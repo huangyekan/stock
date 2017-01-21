@@ -10,6 +10,8 @@ import (
 	//"container/list"
 	"github.com/henrylee2cn/pholcus/common/goquery"
 	"log"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"../util"
 )
 
 type StockResult struct {
@@ -29,13 +31,11 @@ type Stock struct {
 	ChangePercent string
 	DealCount     string
 	DealAmount    string
-
 }
 
 type StockCode struct {
-	Code string
-	Name string
-	TradeLocation string
+	Code          string
+	Name          string
 }
 
 func (stock *Stock) GetData(startDate string, endDate string, stockCode string) ([]Stock, error) {
@@ -95,19 +95,32 @@ func (stock *Stock)GetUrl(stockCode string, startDate string, endDate string) st
 
 }
 
-func (stock Stock)GetAllStocks() []StockCode {
-	shUrl := "http://quote.eastmoney.com/stocklist.html#sh"
-	szUrl := "http://quote.eastmoney.com/stocklist.html#sz"
-	docs, err := goquery.NewDocument(shUrl)
-	if err != nil {
-		log.Fatal("查询上海所有股票代码失败", err)
-	}
-	docs, err = goquery.NewDocument(szUrl)
-	if err != nil {
-		log.Fatal("查询深圳所有股票代码失败", err)
-	}
-	return nil
 
+func (stock *Stock) GetStockCodes() []StockCode {
+	url := "http://quote.eastmoney.com/stocklist.html#sh"
+	decoder := simplifiedchinese.GBK.NewDecoder()
+	docs, err := goquery.NewDocument(url)
+	if err != nil {
+		log.Println("查询股票代码失败 :(" + url +")", err)
+	}
+	size := len(docs.Find("#quotesearch ul li").Nodes)
+	stockCodes := make([]StockCode, size)
+	docs.Find("#quotesearch ul li").Each(
+		func(i int, contentSelection *goquery.Selection) {
+			dst := make([]byte, 2*len(contentSelection.Text()))
+			decoder.Transform(dst, []byte(contentSelection.Text()), true)
+			codeStr := util.ByteString(dst)
+			arry := strings.Split(codeStr, "(")
+			stockCodes[i] = StockCode{
+				Name : arry[0],
+				Code : arry[1][:len(arry[1])-1],
+			}
+		})
+
+	return stockCodes
 }
+
+
+
 
 

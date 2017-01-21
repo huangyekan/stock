@@ -48,3 +48,17 @@ func (mg *Mg)FindAll(db string, collection string, json map[string]interface{}, 
 	c.Find(json).All(result)
 	return nil
 }
+
+func (mg *Mg)RemoveAll(db string, collection string) error {
+	session, e := mgo.Dial(mg.Maddr)
+	if e != nil {
+		return e
+	}
+	defer session.Close()
+	c := session.DB(db).C(collection)
+	_, err := c.RemoveAll(nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
