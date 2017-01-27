@@ -38,6 +38,20 @@ func (mg *Mg)FindOne(db string, collection string, json map[string]interface{}, 
 	return nil
 }
 
+func (mg *Mg)FindSortLimit(db string, collection string, find map[string]interface{}, sort string, limit int, result interface{}) error {
+	session, e := mgo.Dial(mg.Maddr)
+	if e != nil {
+		return e
+	}
+	defer session.Close()
+	c := session.DB(db).C(collection)
+	e = c.Find(find).Sort(sort).Limit(1).One(result)
+	if e != nil{
+		return e
+	}
+	return nil
+}
+
 func (mg *Mg)FindAll(db string, collection string, json map[string]interface{}, result interface{}) error {
 	session, e := mgo.Dial(mg.Maddr)
 	if e != nil {
