@@ -12,7 +12,6 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"../util"
 	"time"
-	"strconv"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -48,9 +47,7 @@ func (stock *Stock) GetData(startDate string, endDate string, stockCode string) 
 		return nil, err
 	}
 	req.Header.Add("User-Agent", "Mozilla/5.0 (compatible, MSIE 10.0, Windows NT, DigExt)")
-	fmt.Println("do")
 	res, err := http.DefaultClient.Do(req)
-	fmt.Println("f")
 	if err != nil {
 		fmt.Println("http request error")
 		return nil, err
@@ -161,12 +158,8 @@ func (stock *Stock) GetStocks(code string, name string) ([]Stock, error) {
 	})
 	stocks := make([]Stock, index)
 	for i:=0; i < index; i++ {
-		//fmt.Println(i)
-		if i == 733 {
-			fmt.Println(arrys[i] + "****" + strconv.Itoa(len(strings.TrimSpace(arrys[i]))))
-		}
 		tds := strings.Split(arrys[i], ";")
-		t, _ := time.Parse(util.Layout, tds[0])
+		t, _ := time.Parse(util.Layout_4, tds[0])
 		stocks[i] = Stock{
 			Code : code,
 			Name : name,
@@ -180,8 +173,8 @@ func (stock *Stock) GetStocks(code string, name string) ([]Stock, error) {
 			Change : tds[7],
 			ChangePercent : tds[8],
 		}
-	}
 
+	}
 	return stocks, nil
 }
 

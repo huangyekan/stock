@@ -45,7 +45,7 @@ func (mg *Mg)FindSortLimit(db string, collection string, find map[string]interfa
 	}
 	defer session.Close()
 	c := session.DB(db).C(collection)
-	e = c.Find(find).Sort(sort).Limit(1).One(result)
+	e = c.Find(find).Sort(sort).Limit(limit).One(result)
 	if e != nil{
 		return e
 	}
